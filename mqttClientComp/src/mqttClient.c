@@ -21,6 +21,7 @@
 #include "interfaces.h"
 #include "json/swir_json.h"
 #include "mqttClient.h"
+#include "mqttDatabase.h"
 
 static void mqttClient_newMsgData(mqttClient_msg_data_t*, MQTTString*, mqttClient_msg_t*);
 static int mqttClient_getNextPacketId(mqttClient_t*);
@@ -523,6 +524,8 @@ static int mqttClient_processConnAck(mqttClient_t* clientData)
       LE_ERROR("mqttClient_subscribe() failed(%d)", rc);
       goto cleanup;
     }
+
+    mqttClientQueue_send(clientData);
   }
   else
   {
@@ -1441,7 +1444,6 @@ cleanup:
 int mqttClient_disconnectData(mqttClient_t* clientData)
 {
   int rc = LE_OK;
-
   if (!clientData->requestRef)
   {
     LE_ERROR("no data connection reference.");
@@ -1571,7 +1573,7 @@ cleanup:
 
 int mqttClient_publish(mqttClient_t* clientData, const char* topicName, mqttClient_msg_t* message)
 {
-  int rc = LE_OK;
+  int rc = LE_FAULT;
   MQTTString topic = MQTTString_initializer;
   topic.cstring = (char *)topicName;
   int len = 0;
@@ -1581,7 +1583,7 @@ int mqttClient_publish(mqttClient_t* clientData, const char* topicName, mqttClie
   if (!clientData->session.isConnected)
   {
     LE_WARN("not connected");
-    goto cleanup;
+    goto error;
   }
 
   if (message->qos == MQTT_CLIENT_QOS1 || message->qos == MQTT_CLIENT_QOS2)
@@ -1593,17 +1595,23 @@ int mqttClient_publish(mqttClient_t* clientData, const char* topicName, mqttClie
   {
     LE_ERROR("MQTTSerialize_publish() failed(%d)", len);
     rc = LE_BAD_PARAMETER;
-    goto cleanup;
+    goto error;
   }
 
   rc = mqttClient_write(clientData, len);
   if (rc)
   {
     LE_ERROR("mqttClient_write() failed(%d)", rc);
-    goto cleanup;
+    goto error;
   } 
   
-cleanup:
+  return rc;
+
+error:
+  if (message->queued)
+  {
+    rc = mqttDatabase_addOutgoing(topicName, message);
+  }
   return rc;
 }
 
@@ -1712,7 +1720,9 @@ void mqttClient_init(mqttClient_t* clientData)
 
   clientData->connStateEvent = le_event_CreateId("MqttConnState", sizeof(mqttClient_connStateData_t));
   clientData->inMsgEvent = le_event_CreateId("MqttInMsg", sizeof(mqttClient_inMsg_t));
-
+  
+  mqttClientQueue_init(clientData);
+  
   le_info_ConnectService();
   le_info_GetImei(clientData->deviceId, sizeof(clientData->deviceId));
   LE_DEBUG("IMEI('%s')", clientData->deviceId);

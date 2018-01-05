@@ -2,6 +2,7 @@ sources:
 {
     mqttMain.c
     src/mqttClient.c
+    src/mqttClientQueue.c
     src/mqtt/mqttConnectClient.c
     src/mqtt/mqttConnectServer.c
     src/mqtt/mqttUnsubscribeClient.c
@@ -12,6 +13,7 @@ sources:
     src/mqtt/mqttSubscribeServer.c
     src/mqtt/mqttPacket.c
     src/json/swir_json.c
+    src/database/mqttDatabase.c
 }
 
 requires:
@@ -26,8 +28,18 @@ requires:
 
 cflags:
 {
+    -I$CURDIR
     -I$CURDIR/inc
     -I$CURDIR/inc/mqtt
+    -I$CURDIR/inc/database
+    -I$CURDIR/../3rdParty/$TARGET/include
+}
+
+ldflags:
+{
+    -L$CURDIR/../3rdParty/$TARGET/lib
+    -lsqlite3
+    -luuid
 }
 
 provides:

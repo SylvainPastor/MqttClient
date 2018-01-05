@@ -60,17 +60,17 @@ typedef enum _mqttClient_QoS_e
 
 typedef struct _mqttClient_connStateData_t
 {
-    bool                               isConnected;
-    int                                connectErrorCode;
-    int                                subErrorCode;
+  bool                               isConnected;
+  int                                connectErrorCode;
+  int                                subErrorCode;
 } mqttClient_connStateData_t;
 
 typedef struct _mqttClient_inMsg_t
 {
-    char                               topicName[MQTT_CLIENT_TOPIC_NAME_LEN + 1];
-    char                               keyName[MQTT_CLIENT_KEY_NAME_LEN + 1];
-    char                               value[MQTT_CLIENT_VALUE_LEN + 1];
-    char                               timestamp[MQTT_CLIENT_TIMESTAMP_LEN + 1];
+  char                               topicName[MQTT_CLIENT_TOPIC_NAME_LEN + 1];
+  char                               keyName[MQTT_CLIENT_KEY_NAME_LEN + 1];
+  char                               value[MQTT_CLIENT_VALUE_LEN + 1];
+  char                               timestamp[MQTT_CLIENT_TIMESTAMP_LEN + 1];
 } mqttClient_inMsg_t;
 
 typedef struct _mqttClient_msg_t
@@ -81,6 +81,7 @@ typedef struct _mqttClient_msg_t
   unsigned short                       id;
   char                                 retained;
   char                                 dup;
+  bool                                 queued;
 } mqttClient_msg_t;
 
 typedef struct _mqttClient_msg_data_t
@@ -156,5 +157,8 @@ int mqttClient_connectUser(mqttClient_t*, const char*);
 
 mqttClient_t* mqttMain_getClient(void);
 void mqttClient_init(mqttClient_t*);
+
+void mqttClientQueue_init(mqttClient_t*);
+void mqttClientQueue_send(mqttClient_t*);
 
 #endif

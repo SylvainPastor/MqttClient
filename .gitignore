@@ -1,5 +1,8 @@
 # Build Products
 _build_*
+3rdParty/bin
+3rdParty/lib
+3rdParty/include
 
 # ... per target
 *.localhost

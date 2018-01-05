@@ -28,6 +28,7 @@ static int mqttMain_SendMessage(const char* key, const char* value)
     .id = 0,
     .payload = payload,
     .payloadLen = strlen(payload),
+    .queued = true,
   };
 
   char* topic = malloc(strlen(MQTT_CLIENT_TOPIC_NAME_PUBLISH) + strlen(mqttClient.deviceId) + 1);
@@ -157,6 +158,7 @@ le_result_t mqtt_Publish(const char* topic, const uint8_t* payload, size_t paylo
         .id = 0,
         .payload = (char*)payload, // gross, we have to cast away const-ness of the payload
         .payloadLen = payloadLength,
+        .queued = true,
     };
 
     return mqttClient_publish(&mqttClient, topic, &msg);
