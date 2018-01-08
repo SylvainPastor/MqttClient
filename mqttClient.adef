@@ -1,5 +1,6 @@
 version: 1.0
 sandboxed: false
+start: auto
 
 executables:
 {
@@ -25,7 +26,6 @@ processes:
     faultAction: ignore
 }
 
-start: auto
 
 bindings:
 {
@@ -40,13 +40,4 @@ bindings:
 extern:
 {
     mqttClient.mqttClientComp.mqtt
-}
-
-bundles:
-{
-    file:
-    {
-        [rx] $CURDIR/3rdParty/$TARGET/lib/libsqlite3.so.0 /lib/libsqlite3.so.0
-        [rx] $CURDIR/3rdParty/$TARGET/lib/libuuid.so.16   /lib/libuuid.so.16
-    }
 }

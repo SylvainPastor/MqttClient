@@ -39,7 +39,7 @@ ldflags:
 {
     -L$CURDIR/../3rdParty/$TARGET/lib
     -lsqlite3
-    -luuid
+    -lossp-uuid
 }
 
 provides:
